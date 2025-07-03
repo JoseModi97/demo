@@ -28334,6 +28334,24 @@
             isTouching = false;
         });
 
+        // Keyboard event handling for Up and Down arrow keys
+        const keyboardScrollStep = 30; // Adjust for how much one key press scrolls, similar to wheel delta
+
+        window.addEventListener('keydown', function(event) {
+            let delta = 0;
+            if (event.key === 'ArrowDown') {
+                delta = keyboardScrollStep;
+                event.preventDefault(); // Prevent default page scroll
+            } else if (event.key === 'ArrowUp') {
+                delta = -keyboardScrollStep;
+                event.preventDefault(); // Prevent default page scroll
+            }
+
+            if (delta !== 0) {
+                handleScroll(delta);
+            }
+        });
+
     });
 }); // End of DOMContentLoaded listener
 
