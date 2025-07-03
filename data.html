@@ -28207,8 +28207,8 @@
     var params = {
         container: document.getElementById('lottie'),
         renderer: 'svg',
-        loop: true,
-        autoplay: true,
+        loop: false, // Changed from true
+        autoplay: false, // Changed from true
         animationData: animationData,
         rendererSettings: {
             preserveAspectRatio: 'xMidYMid slice'
@@ -28218,6 +28218,54 @@
     var anim;
 
     anim = lottie.loadAnimation(params);
+
+    // Scroll-based animation control
+    anim.addEventListener('DOMLoaded', function () {
+        let currentFrame = 0;
+        let targetFrame = 0;
+        const scrollSensitivityFactor = 0.2; // Adjust for sensitivity: smaller means less sensitive
+        const animationSmoothness = 0.1; // Adjust for smoothness: 0.1 is quite smooth, closer to 1 is faster/jumpier
+
+        let isAnimating = false;
+        let rafId = null;
+
+        anim.goToAndStop(currentFrame, true);
+
+        function smoothAnimateToTarget() {
+            if (Math.abs(targetFrame - currentFrame) < 0.1) {
+                currentFrame = targetFrame; // Snap to target
+                anim.goToAndStop(Math.round(currentFrame), true);
+                isAnimating = false;
+                rafId = null;
+                return;
+            }
+
+            currentFrame += (targetFrame - currentFrame) * animationSmoothness;
+            anim.goToAndStop(Math.round(currentFrame), true);
+
+            rafId = requestAnimationFrame(smoothAnimateToTarget);
+        }
+
+        window.addEventListener('wheel', function (event) {
+            event.preventDefault();
+
+            const delta = event.deltaY;
+
+            targetFrame += delta * scrollSensitivityFactor;
+
+            // Clamp targetFrame to animation bounds
+            if (targetFrame < 0) {
+                targetFrame = 0;
+            } else if (targetFrame >= anim.totalFrames) {
+                targetFrame = anim.totalFrames - 1;
+            }
+
+            if (!isAnimating) {
+                isAnimating = true;
+                rafId = requestAnimationFrame(smoothAnimateToTarget);
+            }
+        }, { passive: false });
+    });
 
 </script>
 </body>
