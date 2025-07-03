@@ -28228,12 +28228,13 @@
 
     var anim;
 
-    anim = lottie.loadAnimation(params);
+    window.addEventListener('DOMContentLoaded', function() {
+        anim = lottie.loadAnimation(params);
 
-    // Scroll-based animation control
-    anim.addEventListener('DOMLoaded', function () {
-        let currentFrame = 0;
-        let targetFrame = 0;
+        // Scroll-based animation control
+        anim.addEventListener('DOMLoaded', function () {
+            let currentFrame = 0;
+            let targetFrame = 0;
         const scrollSensitivityFactor = 0.2; // Adjust for sensitivity: smaller means less sensitive
         const animationSmoothness = 0.1; // Adjust for smoothness: 0.1 is quite smooth, closer to 1 is faster/jumpier
 
@@ -28297,6 +28298,7 @@
             }
         }, { passive: false });
     });
+}); // End of DOMContentLoaded listener
 
 </script>
 <div id="scroll-indicator"></div>
