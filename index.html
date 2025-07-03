@@ -28278,11 +28278,7 @@
             rafId = requestAnimationFrame(smoothAnimateToTarget);
         }
 
-        window.addEventListener('wheel', function (event) {
-            event.preventDefault();
-
-            const delta = event.deltaY;
-
+        function handleScroll(delta) {
             targetFrame += delta * scrollSensitivityFactor;
 
             // Clamp targetFrame to animation bounds
@@ -28296,7 +28292,48 @@
                 isAnimating = true;
                 rafId = requestAnimationFrame(smoothAnimateToTarget);
             }
+        }
+
+        window.addEventListener('wheel', function (event) {
+            event.preventDefault();
+            handleScroll(event.deltaY);
         }, { passive: false });
+
+        // Touch event handling
+        let lastTouchY = 0;
+        let isTouching = false;
+
+        window.addEventListener('touchstart', function(event) {
+            if (event.touches.length === 1) {
+                lastTouchY = event.touches[0].clientY;
+                isTouching = true;
+                // Optional: if you want to prevent default touch actions like page scroll
+                // event.preventDefault();
+            }
+        }, { passive: true }); // Use passive true if not preventing default
+
+        window.addEventListener('touchmove', function(event) {
+            if (!isTouching || event.touches.length !== 1) {
+                return;
+            }
+            // Optional: if you want to prevent default touch actions like page scroll
+            // event.preventDefault();
+
+            const touchY = event.touches[0].clientY;
+            const deltaY = lastTouchY - touchY; // Inverted compared to wheel delta
+            lastTouchY = touchY;
+
+            handleScroll(deltaY);
+        }, { passive: true }); // Use passive true if not preventing default
+
+        window.addEventListener('touchend', function(event) {
+            isTouching = false;
+        });
+
+        window.addEventListener('touchcancel', function(event) {
+            isTouching = false;
+        });
+
     });
 }); // End of DOMContentLoaded listener
 
