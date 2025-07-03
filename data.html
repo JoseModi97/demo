@@ -19,6 +19,17 @@
             opacity: 1;
         }
 
+        #scroll-indicator {
+            position: fixed;
+            right: 20px;
+            top: 10vh; /* Initial position, will be updated by JS */
+            width: 8px;
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            z-index: 1000;
+            pointer-events: none; /* So it doesn't interfere with other interactions */
+        }
     </style>
 </head>
 <body>
@@ -28229,12 +28240,31 @@
         let isAnimating = false;
         let rafId = null;
 
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        const indicatorMinTopVh = 10; // Start position in vh
+        const indicatorMaxTopVh = 90; // End position in vh
+        const indicatorTravelRangeVh = indicatorMaxTopVh - indicatorMinTopVh;
+
         anim.goToAndStop(currentFrame, true);
+        // Initial indicator position
+        if (scrollIndicator) {
+            scrollIndicator.style.top = indicatorMinTopVh + 'vh';
+        }
+
+
+        function updateScrollIndicator() {
+            if (scrollIndicator && anim.totalFrames > 1) {
+                const progress = currentFrame / (anim.totalFrames - 1);
+                const indicatorTop = indicatorMinTopVh + (progress * indicatorTravelRangeVh);
+                scrollIndicator.style.top = indicatorTop + 'vh';
+            }
+        }
 
         function smoothAnimateToTarget() {
             if (Math.abs(targetFrame - currentFrame) < 0.1) {
                 currentFrame = targetFrame; // Snap to target
                 anim.goToAndStop(Math.round(currentFrame), true);
+                updateScrollIndicator();
                 isAnimating = false;
                 rafId = null;
                 return;
@@ -28242,6 +28272,7 @@
 
             currentFrame += (targetFrame - currentFrame) * animationSmoothness;
             anim.goToAndStop(Math.round(currentFrame), true);
+            updateScrollIndicator();
 
             rafId = requestAnimationFrame(smoothAnimateToTarget);
         }
@@ -28268,5 +28299,6 @@
     });
 
 </script>
+<div id="scroll-indicator"></div>
 </body>
 </html>
